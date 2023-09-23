@@ -9,7 +9,7 @@ module ImtRb
     MAX_LEAVES = 2**TREE_DEPTH
     EMPTY_LEAF = "\x00" * 32 # == to_binary("0000000000000000000000000000000000000000000000000000000000000000")
 
-    ZERO_VALUES = [
+    ZERO_HASHES = [
       to_binary("0000000000000000000000000000000000000000000000000000000000000000"), # EMPTY_LEAF
       to_binary("ad3228b676f7d3cd4284a5443f17f1962b36e491b30a40b2405849e597ba5fb5"),
       to_binary("b4c11951957c6f8f642c4af61cd6b24640fec6dc7fc607ee8206a99e92410d30"),
@@ -72,16 +72,18 @@ module ImtRb
     end
 
     def root
-      hash = ZERO_VALUES[0]
+      index = @tree[:count]
+
+      hash = ZERO_HASHES[0]
       (0...TREE_DEPTH).each do |level|
-        ith_bit = (@tree[:count] >> level) & 0x01
+        ith_bit = (index >> level) & 0x01
         the_next = @tree[:branch][level]
 
         hash =
           if ith_bit == 1
             digest(the_next + hash)
           else
-            digest(hash + ZERO_VALUES[level])
+            digest(hash + ZERO_HASHES[level])
           end
       end
       hash
@@ -90,11 +92,37 @@ module ImtRb
     def root_hex
       to_hex(root)
     end
+
+    def proof
+      index = @tree[:count] - 1
+      left = @tree[:branch]
+      right = ZERO_HASHES
+
+      result = []
+      (0..TREE_DEPTH).each do |level|
+        ith_bit = (index >> level) & 0x01
+        result[level] = ith_bit == 1 ? left[level] : right[level]
+      end
+
+      result
+    end
   end
 end
 
 # # example
+# # 1. append
 # tree = ImtRb::IncrementalMerkleTree.new
 # leaf = ImtRb::IncrementalMerkleTree.to_binary("0000000000000000000000000000000000000000000000000000000000000001")
 # tree.append(leaf)
 # p tree.root_hex == "21db8421fb719c4d28af3cda6aeee3388f75e2cc467bfc7b950d32a425f7d355"
+
+# # 2. proof
+# tree = ImtRb::IncrementalMerkleTree.new
+# leaf0 = ImtRb::IncrementalMerkleTree.to_binary("1000000000000000000000000000000000000000000000000000000000000001")
+# leaf1 = ImtRb::IncrementalMerkleTree.to_binary("1100000000000000000000000000000000000000000000000000000000000001")
+# leaf2 = ImtRb::IncrementalMerkleTree.to_binary("1110000000000000000000000000000000000000000000000000000000000001")
+# tree.append(leaf0)
+# tree.append(leaf1)
+# tree.append(leaf2)
+# p tree.root_hex
+# puts(tree.proof.map { |x| ImtRb::IncrementalMerkleTree.to_hex(x) })
