@@ -95,13 +95,11 @@ module ImtRb
 
     def proof
       index = @tree[:count] - 1
-      left = @tree[:branch]
-      right = ZERO_HASHES
 
       result = []
-      (0..TREE_DEPTH).each do |level|
+      (0...TREE_DEPTH - 1).each do |level|
         ith_bit = (index >> level) & 0x01
-        result[level] = ith_bit == 1 ? left[level] : right[level]
+        result[level] = ith_bit == 1 ? @tree[:branch][level] : ZERO_HASHES[level]
       end
 
       result
@@ -124,5 +122,7 @@ end
 # tree.append(leaf0)
 # tree.append(leaf1)
 # tree.append(leaf2)
-# p tree.root_hex
-# puts(tree.proof.map { |x| ImtRb::IncrementalMerkleTree.to_hex(x) })
+# puts "root: #{tree.root_hex}"
+# tree.proof.map.with_index do |item, level|
+#   puts "#{level}: #{ImtRb::IncrementalMerkleTree.to_hex(item)}"
+# end
