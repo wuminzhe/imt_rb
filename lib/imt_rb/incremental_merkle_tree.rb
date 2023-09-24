@@ -9,8 +9,9 @@ module ImtRb
     MAX_LEAVES = 2**TREE_DEPTH
     EMPTY_LEAF = "\x00" * 32 # == to_binary("0000000000000000000000000000000000000000000000000000000000000000")
 
+    # the array index of ZERO_HASHES is level index of the tree
     ZERO_HASHES = [
-      to_binary("0000000000000000000000000000000000000000000000000000000000000000"), # EMPTY_LEAF
+      to_binary("0000000000000000000000000000000000000000000000000000000000000000"),
       to_binary("ad3228b676f7d3cd4284a5443f17f1962b36e491b30a40b2405849e597ba5fb5"),
       to_binary("b4c11951957c6f8f642c4af61cd6b24640fec6dc7fc607ee8206a99e92410d30"),
       to_binary("21ddb9a356815c3fac1026b6dec5df3124afbadb485c9ba5a3e3398a04b7ba85"),
@@ -106,23 +107,3 @@ module ImtRb
     end
   end
 end
-
-# # example
-# # 1. append
-# tree = ImtRb::IncrementalMerkleTree.new
-# leaf = ImtRb::IncrementalMerkleTree.to_binary("0000000000000000000000000000000000000000000000000000000000000001")
-# tree.append(leaf)
-# p tree.root_hex == "21db8421fb719c4d28af3cda6aeee3388f75e2cc467bfc7b950d32a425f7d355"
-
-# # 2. proof
-# tree = ImtRb::IncrementalMerkleTree.new
-# leaf0 = ImtRb::IncrementalMerkleTree.to_binary("1000000000000000000000000000000000000000000000000000000000000001")
-# leaf1 = ImtRb::IncrementalMerkleTree.to_binary("1100000000000000000000000000000000000000000000000000000000000001")
-# leaf2 = ImtRb::IncrementalMerkleTree.to_binary("1110000000000000000000000000000000000000000000000000000000000001")
-# tree.append(leaf0)
-# tree.append(leaf1)
-# tree.append(leaf2)
-# puts "root: #{tree.root_hex}"
-# tree.proof.map.with_index do |item, level|
-#   puts "#{level}: #{ImtRb::IncrementalMerkleTree.to_hex(item)}"
-# end
